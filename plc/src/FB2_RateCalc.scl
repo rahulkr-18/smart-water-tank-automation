@@ -1,0 +1,68 @@
+﻿FUNCTION_BLOCK "RateCalc"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      CurrentLevel : Real;
+      InletValve : Bool;
+      OutletPump : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      FillRate : Real;
+      DrainRate : Real;
+   END_VAR
+
+   VAR 
+      PrevLevel : Real;
+      SampleTimer {InstructionName := 'TON_TIME'; LibVersion := '1.0'; S7_SetPoint := 'False'} : TON_TIME;
+   END_VAR
+
+
+BEGIN
+	// ════════════════════════════════════════════════
+	// FB2 — RateCalc
+	// Measures fill and drain rate in percent/minute
+	// Samples level every 10 seconds for stable result
+	// ════════════════════════════════════════════════
+	
+	// ── Start the 10 second timer ─────────────────
+	// WHY: TON counts time. IN=TRUE starts counting.
+	// PT=T#10S sets the target to 10 seconds.
+	// Q goes TRUE when 10 seconds have elapsed.
+	// Timer resets when IN goes FALSE.
+	
+	#SampleTimer(IN := TRUE,
+	             PT := T#10S);
+	
+	// ── Only calculate when 10 seconds elapsed ─────
+	IF #SampleTimer.Q THEN
+	    
+	    // How much did level change in last 10 seconds?
+	    // Positive number = filling
+	    // Negative number = draining
+	    IF (#CurrentLevel - #PrevLevel) > REAL#0.0 THEN
+	        // Tank is filling
+	        // Multiply by 6 converts per-10s to per-minute
+	        // WHY 6: 60 seconds / 10 seconds = 6 samples per minute
+	        #FillRate := (#CurrentLevel - #PrevLevel) * REAL#6.0;
+	    END_IF;
+	    
+	    IF (#CurrentLevel - #PrevLevel) < REAL#0.0 THEN
+	        // Tank is draining
+	        // Difference is negative so multiply by -6
+	        // to get a positive drain rate value
+	        #DrainRate := (#PrevLevel - #CurrentLevel) * REAL#6.0;
+	    END_IF;
+	    
+	    // Store current level for next calculation
+	    #PrevLevel := #CurrentLevel;
+	    
+	    // Reset timer so it starts counting again
+	    // WHY: Setting IN=FALSE resets the TON timer
+	    // Next scan IN goes TRUE again and counting restarts
+	    #SampleTimer(IN := FALSE,
+	                 PT := T#10S);
+	    
+	END_IF;
+END_FUNCTION_BLOCK
+

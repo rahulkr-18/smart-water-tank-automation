@@ -1,0 +1,29 @@
+﻿FUNCTION "ScaleLevel" : Real
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      RawValue : Int;
+      ScaleMin : Real;
+      ScaleMax : Real;
+   END_VAR
+
+
+BEGIN
+	// ══════════════════════════════════════════
+	// FC1 — ScaleLevel
+	// Converts raw analog (0-27648) to 0-100%
+	// ══════════════════════════════════════════
+	
+	// Calculate scaled value
+	// INT_TO_REAL converts integer to decimal number
+	// so division works correctly
+	#ScaleLevel := ((INT_TO_REAL(#RawValue) / 27648.0) * (#ScaleMax - #ScaleMin)) + #ScaleMin;
+	
+	// Clamp — never return value outside valid range
+	IF #ScaleLevel > #ScaleMax THEN
+	    #ScaleLevel := #ScaleMax;
+	ELSIF #ScaleLevel < #ScaleMin THEN
+	    #ScaleLevel := #ScaleMin;
+	END_IF;
+END_FUNCTION
+

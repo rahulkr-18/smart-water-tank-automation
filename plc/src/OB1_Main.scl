@@ -1,0 +1,46 @@
+﻿ORGANIZATION_BLOCK "Main"
+TITLE = "Main Program Sweep (Cycle)"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+
+BEGIN
+	"TankData".LevelRaw := "LevelRaw";
+	
+	"TankData".LevelPercent := "ScaleLevel"(
+	                                        RawValue := "TankData".LevelRaw,
+	                                        ScaleMin := REAL#0.0,
+	                                        ScaleMax := REAL#100.0
+	);
+	
+	"TankControl_DB"(
+	                 StartBtn      := "StartBtn",
+	                 StopBtn       := "StopBtn",
+	                 EStop         := "EStop",
+	                 LevelLow      := "LevelLow",
+	                 LevelMedium   := "LevelMedium",
+	                 LevelHigh     := "LevelHigh",
+	                 LevelPercent  := "TankData".LevelPercent
+	);
+	
+	"TankData".InletValve := "TankControl_DB".InletValve;
+	"TankData".OutletPump := "TankControl_DB".OutletPump;
+	"TankData".AlarmOverflow := "TankControl_DB".AlarmOverflow;
+	"TankData".AlarmDryRun := "TankControl_DB".AlarmDryRun;
+	"TankData".SystemRunning := "TankControl_DB".SystemRunning;
+	
+	"RateCalc_DB"(
+	              CurrentLevel := "TankData".LevelPercent,
+	              InletValve   := "TankData".InletValve,
+	              OutletPump   := "TankData".OutletPump
+	);
+	
+	"TankData".FillRate := "RateCalc_DB".FillRate;
+	"TankData".DrainRate := "RateCalc_DB".DrainRate;
+	
+	"InletValve" := "TankData".InletValve;
+	"OutletPump" := "TankData".OutletPump;
+	"AlarmOverflow" := "TankData".AlarmOverflow;
+	"AlarmDryRun" := "TankData".AlarmDryRun;
+	"SystemRunning" := "TankData".SystemRunning;
+END_ORGANIZATION_BLOCK
+

@@ -1,0 +1,90 @@
+﻿FUNCTION_BLOCK "TankControl"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      StartBtn : Bool;
+      StopBtn : Bool;
+      EStop : Bool;
+      LevelLow : Bool;
+      LevelMedium : Bool;
+      LevelHigh : Bool;
+      LevelPercent : Real;
+   END_VAR
+
+   VAR_OUTPUT 
+      InletValve : Bool;
+      OutletPump : Bool;
+      AlarmOverflow : Bool;
+      AlarmDryRun : Bool;
+      SystemRunning : Bool;
+   END_VAR
+
+   VAR 
+      RunLatch : Bool;
+      ValveLatch : Bool;
+   END_VAR
+
+
+BEGIN
+	IF #EStop THEN
+	    #RunLatch := FALSE;
+	    #ValveLatch := FALSE;
+	    #InletValve := FALSE;
+	    #OutletPump := FALSE;
+	    #AlarmOverflow := FALSE;
+	    #AlarmDryRun := FALSE;
+	    #SystemRunning := FALSE;
+	    RETURN;
+	END_IF;
+	
+	IF #StartBtn THEN
+	    #RunLatch := TRUE;
+	END_IF;
+	
+	IF #StopBtn THEN
+	    #RunLatch := FALSE;
+	    #ValveLatch := FALSE;
+	END_IF;
+	
+	#SystemRunning := #RunLatch;
+	
+	IF #RunLatch THEN
+	    
+	    #OutletPump := TRUE;
+	    
+	    IF #LevelLow THEN
+	        #ValveLatch := TRUE;
+	    END_IF;
+	    
+	    IF #LevelHigh THEN
+	        #ValveLatch := FALSE;
+	    END_IF;
+	    
+	    #InletValve := #ValveLatch;
+	    
+	    IF #LevelPercent > REAL#95.0 THEN
+	        IF #InletValve THEN
+	            #AlarmOverflow := TRUE;
+	            #InletValve := FALSE;
+	            #ValveLatch := FALSE;
+	        END_IF;
+	    ELSE
+	        #AlarmOverflow := FALSE;
+	    END_IF;
+	    
+	    IF #LevelPercent < REAL#5.0 THEN
+	        IF #OutletPump THEN
+	            #AlarmDryRun := TRUE;
+	            #OutletPump := FALSE;
+	        END_IF;
+	    ELSE
+	        #AlarmDryRun := FALSE;
+	    END_IF;
+	    
+	ELSE
+	    #InletValve := FALSE;
+	    #OutletPump := FALSE;
+	    
+	END_IF;
+END_FUNCTION_BLOCK
+

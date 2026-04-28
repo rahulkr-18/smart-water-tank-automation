@@ -205,3 +205,22 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# TIA Portal internal files — do not commit these
+plc/WaterTankControl1/AdditionalFiles/
+plc/WaterTankControl1/Logs/
+plc/WaterTankControl1/System/
+plc/WaterTankControl1/TMP/
+plc/WaterTankControl1/UserFiles/
+plc/WaterTankControl1/Vci/
+plc/WaterTankControl1/XRef/
+plc/WaterTankControl1/IM/
+plc/WaterTankControl1/*.lock
+plc/WaterTankControl1/~*
+plc/WaterTankControl1/*.idx
+plc/WaterTankControl1/*.plf
+plc/WaterTankControl/*.lock
+plc/WaterTankControl/~*
+
+# Keep only these important files
+# plc/WaterTankControl1.zap20  ← archive (keep)
+# plc/src/*.scl                ← source code (keep)
