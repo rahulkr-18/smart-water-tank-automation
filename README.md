@@ -31,6 +31,7 @@ S7-1500 · OB1 · FB1 · FB2 · FC1 · DB1
 ↕ Simulation
 Field Layer — PLCSIM
 Virtual sensors · Valve · Pump
+
 ---
 
 ## Technology Stack
@@ -65,6 +66,7 @@ smart-water-tank-automation/
 │   └── requirements.txt
 └── docs/
 └── project_documentation.pdf
+
 ---
 
 ## PLC Program Structure
